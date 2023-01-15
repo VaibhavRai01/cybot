@@ -1,4 +1,5 @@
 import discord
+from dotenv import load_dotenv
 import grequests
 import matplotlib
 from matplotlib import pyplot
@@ -1456,4 +1457,5 @@ async def graph_compare(Interaction: discord.Interaction, p1: str):
 # #                 await channel.send(str(problem[i]) + '\n')
 
 
+os.getenv("TOKEN")
 bot.run(os.environ["TOKEN"])
