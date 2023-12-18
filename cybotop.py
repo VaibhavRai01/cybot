@@ -1399,8 +1399,7 @@ async def graph_compare(Interaction: discord.Interaction, p1: str):
         link = "https://codeforces.com/api/user.rating?handle="
         link += handle
         print(link)
-        request_info = [grequests.get(link)]
-        responses = grequests.map(request_info)
+        responses = requests.get(link)
         details_api = {}
         for page in responses:
             if page.request.url == link:
