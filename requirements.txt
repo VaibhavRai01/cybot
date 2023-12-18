@@ -1,4 +1,4 @@
-discord.py==3.10.17
+discord.py==2.0.0
 grequests==0.6.0
 matplotlib==3.4.3
 psycopg2==2.9.2
