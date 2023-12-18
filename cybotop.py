@@ -1,3 +1,7 @@
+import curious_george
+
+# Apply the patch before importing other modules
+curious_george.patch_all(thread=False, select=False)
 import discord
 import grequests
 import matplotlib
