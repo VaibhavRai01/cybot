@@ -22,7 +22,8 @@ import asyncio
 from discord.ext.commands import MemberConverter
 from datetime import datetime, timedelta
 from discord.ext import tasks
-
+from gevent import monkey as curious_george
+curious_george.patch_all(thread=False, select=False)
 conn = psycopg2.connect("postgres://cybot:TdF93F0D7Hg26Wr9icHwjJpOnah9lpe2@dpg-cm0167eg1b2c73cl5ke0-a/bot_mbx0")
 
 cur = conn.cursor()
