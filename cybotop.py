@@ -1,4 +1,4 @@
-import subprocess
+
 import discord
 import matplotlib
 from matplotlib import pyplot
@@ -1464,4 +1464,4 @@ client = discord.Client(intents=intents)
 
 # Fetch the token from the 'TOKEN' environment variable
 tokenval = os.environ.get('token')
-subprocess.run(tokenval)
+bot.run(token)
