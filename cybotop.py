@@ -626,7 +626,7 @@ def changearg(arg):
 async def upcoming_contests(Interaction: discord.Interaction):
     await Interaction.response.defer()
     url = "https://codeforces.com/api/contest.list?"
-    response = await requests.get(url)
+    response = requests.get(url)
     data = response.json()
     result = data['result']
     list = []
