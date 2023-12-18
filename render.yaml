@@ -1,2 +1,2 @@
 buildCommand: pip install -r requirements.txt
-startCommand: python cybotbotop.py
+startCommand: python cybotop.py
