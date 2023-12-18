@@ -1457,5 +1457,5 @@ async def graph_compare(Interaction: discord.Interaction, p1: str):
 # #                 await channel.send(str(problem[i]) + '\n')
 client = discord.Client()
 
-token = os.environ['TOKEN']
+token = os.environ['token']
 client.run(token)
