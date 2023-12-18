@@ -1,5 +1,4 @@
-from gevent import monkey
-monkey.patch_all()
+
 import discord
 import grequests
 import matplotlib
@@ -117,14 +116,14 @@ class ButtonYesNo(View):
             rows = cur.fetchall()
             handle1 = rows[0][0]
             handle2 = rows[1][0]
-            user1doneporblems = get_user_problems(handle1)
-            user2doneproblems = get_user_problems(handle2)
+            user1doneporblems = await get_user_problems(handle1)
+            user2doneproblems = await get_user_problems(handle2)
             alldoneproblems = user1doneporblems + user2doneproblems
             alldoneproblems = list(alldoneproblems)
             if duelrating is not None and (duelrating < 800 or duelrating > 3500 or duelrating % 100 != 0):
                 await self.inter.edit_original_response("Rating dhang se daal")
             else:
-                unsolvedprobs = get_user_unsolved_problems(alldoneproblems, duelrating, None)
+                unsolvedprobs = await get_user_unsolved_problems(alldoneproblems, duelrating, None)
                 if not unsolvedprobs:
                     await self.inter.edit_original_response(f"Nahi hai bhai question Bank me", view=None)
                     return
@@ -139,7 +138,7 @@ class ButtonYesNo(View):
                 conn.commit()
                 desc = f"your time has come go solve [this]({linktobesold})"
                 ti = "Here is your problem"
-                embed = send_embed(ti, desc)
+                embed =await send_embed(ti, desc)
                 await self.inter.edit_original_response(embed=embed, view=None)
 
         else:
@@ -150,7 +149,7 @@ class ButtonYesNo(View):
     async def no(self, interaction, button):
         if interaction.user == self.user1:
             await self.inter.edit_original_response(
-                embed=send_embed("Battle Declined", "Its not the first time you are rejected"), view=None)
+                embed=await send_embed("Battle Declined", "Its not the first time you are rejected"), view=None)
         else:
             await interaction.response.send_message('Tere lie nahi tha bhai', ephemeral=True)
         pass
@@ -179,7 +178,7 @@ class ButtonYesNoduel_end(View):
             cur.execute("delete from duelchallenge where user1=%s or user2=%s", (str(interaction.user.id),
                                                                                  str(interaction.user.id),))
             conn.commit()
-            await self.inter.edit_original_response(embed=send_embed(ti, desc), view=None)
+            await self.inter.edit_original_response(embed=await send_embed(ti, desc), view=None)
         else:
             await interaction.response.send_message('Tere lie nahi tha bhai', ephemeral=True)
 
@@ -187,13 +186,13 @@ class ButtonYesNoduel_end(View):
     async def no(self, interaction, button):
         if str(interaction.user.id) == str(self.user1):
             await self.inter.edit_original_response(
-                embed=send_embed("Draw Declined", "Looks like your opponent has some ideas up his sleeve. Buckle up"),
+                embed=await send_embed("Draw Declined", "Looks like your opponent has some ideas up his sleeve. Buckle up"),
                 view=None)
         else:
             await interaction.response.send_message('Tere lie nahi tha bhai', ephemeral=True)
 
 
-def get_user_problems(handle):
+async def get_user_problems(handle):
     user_problems = []
     url = f"https://codeforces.com/api/user.status?handle={handle}"
     response = requests.get(url)
@@ -209,7 +208,7 @@ def get_user_problems(handle):
     return user_problems
 
 
-def get_user_unsolved_problems(user_problems, rating, tags):
+async def get_user_unsolved_problems(user_problems, rating, tags):
     unsolved_user_problems = []
     if rating is None:
         cur.execute('SELECT ContestID, Index, Rating, Tags from PROBLEMS')
@@ -244,7 +243,7 @@ def get_user_unsolved_problems(user_problems, rating, tags):
     return unsolved_user_problems
 
 
-def unixTimeToHumanReadableVaibhav(seconds):
+async def unixTimeToHumanReadableVaibhav(seconds):
     # Save the time in Human
     # readable format
     ans = ""
@@ -352,7 +351,7 @@ def unixTimeToHumanReadableVaibhav(seconds):
     return ans
 
 
-def send_embed(ti, desc):
+async def send_embed(ti, desc):
     embed = discord.Embed(
         colour=discord.Colour.dark_teal(),
         description=desc,
@@ -369,11 +368,11 @@ bot_button_message_id = None
 async def on_ready():
     synced = await bot.tree.sync()
     print(f"Slash commands synced and lenght is " + str(len(synced)) + "commnads")
-    reminder.start()
-    # daily_problems.start()
+    await reminder.start()
+    await daily_problems.start()
 
 
-def unixToHumanandUtkarsh(seconds):
+async def unixToHumanandUtkarsh(seconds):
     ans = ""
     extraTime = seconds % (24 * 60 * 60)
     hours = extraTime // 3600
@@ -397,7 +396,7 @@ def unixToHumanandUtkarsh(seconds):
     return ans
 
 
-def unixTimeToHumanReadable(seconds):
+async def unixTimeToHumanReadable(seconds):
     # Save the time in Human
     # readable format
     ans = []
@@ -532,7 +531,7 @@ async def reminder():
             contest = r['name']
         if r['phase'] == "FINISHED":
             break
-    t1 = unixTimeToHumanReadable(ts)
+    t1 = await unixTimeToHumanReadable(ts)
     now = datetime.now()
     now1 = str(now)
     now1 = now1.split(".")
@@ -564,7 +563,7 @@ async def daily_problems():
         solved.append([row[0], row[1]])
     rating = random.choice([800, 900, 1000])
     tags = []
-    unsolved = get_user_unsolved_problems(solved, rating, tags)
+    unsolved = await get_user_unsolved_problems(solved, rating, tags)
     unsolved1 = random.sample(unsolved, 2)
     link1 = "https://codeforces.com/contest/" + str(unsolved1[0][0]) + "/problem/" + str(unsolved1[0][1])
     link2 = "https://codeforces.com/contest/" + str(unsolved1[1][0]) + "/problem/" + str(unsolved1[1][1])
@@ -578,7 +577,7 @@ async def daily_problems():
     await mes2.add_reaction(emoji)
 
 
-def asking_compilation_error(Interaction, handlename, random_key):
+async def asking_compilation_error(Interaction, handlename, random_key):
     handlemention = Interaction.user
     print(handlename)
 
@@ -634,7 +633,7 @@ async def upcoming_contests(Interaction: discord.Interaction):
     for r in result:
         if r['phase'] == "BEFORE":
             ts = r['startTimeSeconds']
-            t1 = unixTimeToHumanReadable(ts)
+            t1 = await unixTimeToHumanReadable(ts)
             now = datetime.now()
             now1 = str(now)
             now1 = now1.split(".")
@@ -659,7 +658,7 @@ async def upcoming_contests(Interaction: discord.Interaction):
         x += 1
     desc = f"{contests}"
     ti = "Upcoming Contests- "
-    embed = send_embed(ti, desc)
+    embed = await send_embed(ti, desc)
     await Interaction.edit_original_response(embed=embed)
 
 
@@ -677,7 +676,7 @@ async def solo_arise(Interaction: discord.Interaction, rating: int = None, tags:
     if roww:
         desc = 'You are already in solo Complete you ongoing solo by using solo_complete command'
         ti = 'Already in solo'
-        embed = send_embed(ti, desc)
+        embed = await send_embed(ti, desc)
         await Interaction.edit_original_response(embed=embed)
         return
     cur.execute('select Cf_ID from disc_cf_id where DiscID=%s', (str(Interaction.user.id),))
@@ -686,15 +685,15 @@ async def solo_arise(Interaction: discord.Interaction, rating: int = None, tags:
     if row is None:
         desc = 'You have not identified your handle to do so use !handle identify <cf_id>'
         ti = 'Identification Pending'
-        embed = send_embed(ti, desc)
+        embed = await send_embed(ti, desc)
         await Interaction.edit_original_response(embed=embed)
         return
     else:
-        user_probs = get_user_problems(row[0][0])
+        user_probs = await get_user_problems(row[0][0])
         if rating is not None and (rating < 800 or rating > 3500 or rating % 100 != 0):
             await Interaction.edit_original_response("Rating dhang se daal")
         else:
-            unsolvedprobs = get_user_unsolved_problems(user_probs, rating, taglis)
+            unsolvedprobs = await get_user_unsolved_problems(user_probs, rating, taglis)
             if not unsolvedprobs:
                 await Interaction.edit_original_response(f"Nahi hai bhai question Bank me")
                 return
@@ -709,7 +708,7 @@ async def solo_arise(Interaction: discord.Interaction, rating: int = None, tags:
             conn.commit()
             desc = f"your time has come go solve [this]({linktobesold})"
             ti = "Here is your problem"
-            embed = send_embed(ti, desc)
+            embed = await send_embed(ti, desc)
             await Interaction.edit_original_response(embed=embed)
 
 
@@ -723,7 +722,7 @@ async def solo_end(Interaction: discord.Interaction):
     if not rows:
         desc = 'You are not in solo'
         ti = 'Go level up!'
-        embed = send_embed(ti, desc)
+        embed = await send_embed(ti, desc)
         await Interaction.edit_original_response(embed=embed)
         return
     url = f"https://codeforces.com/api/user.status?handle={rows[0][1]}&from=1&count=30"
@@ -746,7 +745,7 @@ async def solo_end(Interaction: discord.Interaction):
         cur.execute("UPDATE SoloLeaderboard set score = %s where DiscordId = %s", (newscore, str(Interaction.user.id),))
         conn.commit()
         t2 = rows[0][4]
-        t1 = unixTimeToHumanReadable(unixt1)
+        t1 = await unixTimeToHumanReadable(unixt1)
         datetime_str = str(t1[1]) + "/" + str(t1[2]) + "/" + str(t1[0]) + " " + str(t1[3]) + ":" + str(
             t1[4]) + ":" + str(t1[5])
         datetime_object = datetime.strptime(datetime_str, '%m/%d/%Y %H:%M:%S')
@@ -757,7 +756,7 @@ async def solo_end(Interaction: discord.Interaction):
         desc = f'''You have levelled up 
         time taken:- {duration}'''
         ti = 'Level Up!'
-        embed = send_embed(ti, desc)
+        embed = await send_embed(ti, desc)
         await Interaction.edit_original_response(embed=embed)
     else:
         cur.execute("SELECT score from SoloLeaderboard where DiscordId = %s", (str(Interaction.user.id),))
@@ -767,7 +766,7 @@ async def solo_end(Interaction: discord.Interaction):
         conn.commit()
         desc = 'Ese kese package milega'
         ti = 'Gonna cry ?'
-        embed = send_embed(ti, desc)
+        embed = await send_embed(ti, desc)
         await Interaction.edit_original_response(embed=embed)
 
     cur.execute('Delete from sololevelling where userdisc=%s', (user,))
@@ -788,7 +787,7 @@ async def solo_top(Interaction: discord.Interaction):
         x += 1
     ti = "Top 10"
     desc = f"{s}"
-    embed = send_embed(ti, desc)
+    embed = await send_embed(ti, desc)
     await Interaction.edit_original_response(embed=embed)
 
 
@@ -803,14 +802,14 @@ async def handle_identify(Interaction: discord.Interaction, handle_name: str):
     if rows:
         ti = 'Already Identified'
         desc = 'The handle is already registered to database to change it to different account use handle_change'
-        embed = send_embed(ti, desc)
+        embed = await send_embed(ti, desc)
         await Interaction.edit_original_response(embed=embed)
         return
     linktouser = "https://codeforces.com/api/user.info?handles=" + CFID
     response = requests.get(linktouser)
     if response.status_code == 200:
         random_key = random.choice(list(handlesetproblems.keys()))
-        embed = asking_compilation_error(Interaction, CFID, random_key)
+        embed = await asking_compilation_error(Interaction, CFID, random_key)
         await Interaction.edit_original_response(embed=embed)
         await asyncio.sleep(60)
         linktorecentsub = "https://codeforces.com/api/user.status?handle=" + CFID + "&from=1&count=1"
@@ -828,7 +827,7 @@ async def handle_identify(Interaction: discord.Interaction, handle_name: str):
                         desc = f"{Interaction.user.mention} handle has been registerd with {userid} and stop " \
                                f"spamming!!! ) "
                         ti = 'Identification Already successfull'
-                        embed = send_embed(ti, desc)
+                        embed = await send_embed(ti, desc)
                         await Interaction.edit_original_response(embed=embed)
                         conn.commit()
                         return
@@ -838,7 +837,7 @@ async def handle_identify(Interaction: discord.Interaction, handle_name: str):
                     cur.execute("INSERT INTO DuelLeaderboard values(%s, %s)", (str(Interaction.user.id), 0))
                     conn.commit()
                     ti = 'Identification Successfull'
-                    embed = send_embed(ti, desc)
+                    embed = await send_embed(ti, desc)
                     await Interaction.edit_original_response(embed=embed)
                 else:
                     desc = 'Please only submit compilation error'
@@ -848,7 +847,7 @@ async def handle_identify(Interaction: discord.Interaction, handle_name: str):
             else:
                 desc = 'You are too slow Try completing in 60 seconds'
                 ti = 'Timed Out'
-                embed = send_embed(ti, desc)
+                embed = await send_embed(ti, desc)
                 await Interaction.edit_original_response(embed=embed)
         else:
             desc = 'please try again later there might be issues with API'
@@ -858,7 +857,7 @@ async def handle_identify(Interaction: discord.Interaction, handle_name: str):
     else:
         desc = f'{CFID} mentioned does not exist'
         ti = 'Identification Unsuccessfull'
-        embed = send_embed(ti, desc)
+        embed = await send_embed(ti, desc)
         await Interaction.edit_original_response(embed=embed)
 
 
@@ -874,13 +873,13 @@ async def handle_change(Interaction: discord.Interaction, handle_name: str):
         if rows[0][1] == CFID:
             desc = 'Handle is already set to this account'
             ti = 'Same as Old'
-            await Interaction.edit_original_response(embed=send_embed(ti, desc))
+            await Interaction.edit_original_response(embed=await send_embed(ti, desc))
             return
         linktouser = "https://codeforces.com/api/user.info?handles=" + CFID
         response = requests.get(linktouser)
         if response.status_code == 200:
             random_key = random.choice(list(handlesetproblems.keys()))
-            embed = asking_compilation_error(Interaction, CFID, random_key)
+            embed =await asking_compilation_error(Interaction, CFID, random_key)
             await Interaction.edit_original_response(embed=embed)
             await asyncio.sleep(60)
             linktorecentsub = "https://codeforces.com/api/user.status?handle=" + CFID + "&from=1&count=1"
@@ -896,17 +895,17 @@ async def handle_change(Interaction: discord.Interaction, handle_name: str):
                         conn.commit()
                         desc = f"{Interaction.user.mention} handle has changed to {userid}"
                         ti = 'Updation Successfull'
-                        embed = send_embed(ti, desc)
+                        embed = await send_embed(ti, desc)
                         await Interaction.edit_original_response(embed=embed)
                     else:
                         desc = 'Please only submit compilation error'
                         ti = 'Submission Error'
-                        embed = send_embed(ti, desc)
+                        embed = await send_embed(ti, desc)
                         await Interaction.edit_original_response(embed=embed)
                 else:
                     desc = 'You are too slow Try completing in 60 seconds'
                     ti = 'Timed Out'
-                    embed = send_embed(ti, desc)
+                    embed =await send_embed(ti, desc)
                     await Interaction.edit_original_response(embed=embed)
             else:
                 desc = 'please try again later there might be issues with API'
@@ -916,11 +915,11 @@ async def handle_change(Interaction: discord.Interaction, handle_name: str):
         else:
             desc = 'No User exist with the given codeforces id provided'
             ti = 'No CF handle found'
-            await Interaction.edit_original_response(embed=send_embed(ti, desc))
+            await Interaction.edit_original_response(embed=await send_embed(ti, desc))
     else:
         desc = 'Looks like you have not identified yours CF handle yet'
         ti = 'Updation Unsuccesfull'
-        await Interaction.edit_original_response(embed=send_embed(ti, desc))
+        await Interaction.edit_original_response(embed= await send_embed(ti, desc))
 
 
 @bot.tree.command(name='duel_end', description='Ends the duel you are currently in')
@@ -933,7 +932,7 @@ async def duel_end(Interaction: discord.Interaction):
     if not row:
         ti = "ERRROR 404"
         desc = "you are not in any duel"
-        await Interaction.edit_original_response(embed=send_embed(ti, desc))
+        await Interaction.edit_original_response(embed=await send_embed(ti, desc))
         return
     else:
         contestid = row[0][2]
@@ -985,7 +984,7 @@ async def duel_end(Interaction: discord.Interaction):
                             (newscore, handle2,))
                 conn.commit()
                 t2 = row[0][4]
-                t1 = unixTimeToHumanReadable(unixt2)
+                t1 = await unixTimeToHumanReadable(unixt2)
                 datetime_str = str(t1[1]) + "/" + str(t1[2]) + "/" + str(t1[0]) + " " + str(t1[3]) + ":" + str(
                     t1[4]) + ":" + str(t1[5])
                 datetime_object = datetime.strptime(datetime_str, '%m/%d/%Y %H:%M:%S')
@@ -997,7 +996,7 @@ async def duel_end(Interaction: discord.Interaction):
                 ti = "RESULT"
                 handle1 = await bot.fetch_user(int(handle1))
                 desc = str(handle1) + " won and the time taken to solve this problem " + str(duration)
-                await Interaction.edit_original_response(embed=send_embed(ti, desc))
+                await Interaction.edit_original_response(embed=await send_embed(ti, desc))
             elif unixt2 > unixt1:
                 handle1 = str(row[0][0])
                 handle2 = str(row[0][1])
@@ -1013,7 +1012,7 @@ async def duel_end(Interaction: discord.Interaction):
                             (newscore, handle2,))
                 conn.commit()
                 t2 = row[0][4]
-                t1 = unixTimeToHumanReadable(unixt1)
+                t1 = await unixTimeToHumanReadable(unixt1)
                 datetime_str = str(t1[1]) + "/" + str(t1[2]) + "/" + str(t1[0]) + " " + str(t1[3]) + ":" + str(
                     t1[4]) + ":" + str(t1[5])
                 datetime_object = datetime.strptime(datetime_str, '%m/%d/%Y %H:%M:%S')
@@ -1025,11 +1024,11 @@ async def duel_end(Interaction: discord.Interaction):
 
                 handle2 = await bot.fetch_user(int(handle2))
                 desc = str(handle2) + " won and the time taken to solve this problem " + str(duration)
-                await Interaction.edit_original_response(embed=send_embed(ti, desc))
+                await Interaction.edit_original_response(embed=await send_embed(ti, desc))
             else:
                 ti = "RESULT"
                 desc = "draw"
-                await Interaction.edit_original_response(embed=send_embed(ti, desc))
+                await Interaction.edit_original_response(embed=await send_embed(ti, desc))
             cur.execute("delete from duelchallenge where user1=%s or user2=%s", (str(row[0][1]), str(row[0][1]),))
             conn.commit()
         elif bool1 == 1:
@@ -1047,7 +1046,7 @@ async def duel_end(Interaction: discord.Interaction):
                         (newscore, handle2,))
             conn.commit()
             t2 = row[0][4]
-            t1 = unixTimeToHumanReadable(unixt1)
+            t1 = await unixTimeToHumanReadable(unixt1)
             datetime_str = str(t1[1]) + "/" + str(t1[2]) + "/" + str(t1[0]) + " " + str(t1[3]) + ":" + str(
                 t1[4]) + ":" + str(t1[5])
             datetime_object = datetime.strptime(datetime_str, '%m/%d/%Y %H:%M:%S')
@@ -1058,7 +1057,7 @@ async def duel_end(Interaction: discord.Interaction):
             ti = "RESULT"
             handle2 = await bot.fetch_user(int(handle2))
             desc = str(handle2) + " won and the time taken to solve this problem " + str(duration)
-            await Interaction.edit_original_response(embed=send_embed(ti, desc))
+            await Interaction.edit_original_response(embed=await send_embed(ti, desc))
             cur.execute("delete from duelchallenge where user1=%s or user2=%s", (str(row[0][1]), str(row[0][1]),))
             conn.commit()
         elif bool2 == 1:
@@ -1076,7 +1075,7 @@ async def duel_end(Interaction: discord.Interaction):
                         (newscore, handle2,))
             conn.commit()
             t2 = row[0][4]
-            t1 = unixTimeToHumanReadable(unixt2)
+            t1 =await unixTimeToHumanReadable(unixt2)
             datetime_str = str(t1[1]) + "/" + str(t1[2]) + "/" + str(t1[0]) + " " + str(t1[3]) + ":" + str(
                 t1[4]) + ":" + str(t1[5])
             datetime_object = datetime.strptime(datetime_str, '%m/%d/%Y %H:%M:%S')
@@ -1088,7 +1087,7 @@ async def duel_end(Interaction: discord.Interaction):
             ti = "RESULT"
             handle1 = await bot.fetch_user(int(handle1))
             desc = str(handle1) + " won and the time taken to solve this problem " + str(duration)
-            await Interaction.edit_original_response(embed=send_embed(ti, desc))
+            await Interaction.edit_original_response(embed=await send_embed(ti, desc))
             cur.execute("delete from duelchallenge where user1=%s or user2=%s", (str(row[0][1]), str(row[0][1]),))
             conn.commit()
         else:
@@ -1099,7 +1098,7 @@ async def duel_end(Interaction: discord.Interaction):
                 handle_name = row[0][1]
             handle_name1 = await bot.fetch_user(handle_name)
             desc = f"{handle_name1.mention}You have been offered a draw"
-            await Interaction.edit_original_response(embed=send_embed(ti, desc),
+            await Interaction.edit_original_response(embed=await send_embed(ti, desc),
                                                      view=ButtonYesNoduel_end(Interaction, 30, handle_name))
 
 
@@ -1113,7 +1112,7 @@ async def handle_set(Interaction: discord.Interaction, disc_id: discord.Member, 
         conn.commit()
         rows = cur.fetchall()
         if rows:
-            await Interaction.edit_original_response(embed=send_embed("Problem", "Handle already set "))
+            await Interaction.edit_original_response(embed=await send_embed("Problem", "Handle already set "))
             return
         cur.execute("Insert into disc_cf_id values (%s,%s)", (str(disc_id.id), str(handle),))
         conn.commit()
@@ -1121,9 +1120,9 @@ async def handle_set(Interaction: discord.Interaction, disc_id: discord.Member, 
         cur.execute("INSERT INTO DuelLeaderboard values(%s, %s)", (str(disc_id.id), 0))
         conn.commit()
         await Interaction.edit_original_response(
-            embed=send_embed("Handle Identified", f"Handle Identified Successfully for {disc_id.mention} to {handle}"))
+            embed=await send_embed("Handle Identified", f"Handle Identified Successfully for {disc_id.mention} to {handle}"))
     else:
-        await Interaction.edit_original_response(embed=send_embed("Try Again", "Handle does not exist try again"))
+        await Interaction.edit_original_response(embed=await send_embed("Try Again", "Handle does not exist try again"))
 
 
 @bot.tree.command(name='duel_challenge', description='Challenge other user for a 1v1 battle')
@@ -1133,7 +1132,7 @@ async def duel_challenge(Interaction: discord.Interaction, handle_name: discord.
     if Interaction.user.id == handle_name.id:
         ti = "Cannot challenge yourself"
         desc = f"Lonely? Try solo"
-        await Interaction.edit_original_response(embed=send_embed(ti, desc))
+        await Interaction.edit_original_response(embed=await send_embed(ti, desc))
         return
     cur.execute("select Cf_ID from disc_cf_id where DiscID=%s", (str(Interaction.user.id),))
     conn.commit()
@@ -1141,7 +1140,7 @@ async def duel_challenge(Interaction: discord.Interaction, handle_name: discord.
     duelrating = rating
     row = cur.fetchall()
     if not row:
-        await Interaction.edit_original_response(embed=send_embed("Handle not identified",
+        await Interaction.edit_original_response(embed=await send_embed("Handle not identified",
                                                                  f"Looks like {Interaction.user.mention} has not "
                                                                  f"identified handle"))
         return
@@ -1150,7 +1149,7 @@ async def duel_challenge(Interaction: discord.Interaction, handle_name: discord.
     rows = cur.fetchall()
     if not rows:
         await Interaction.edit_original_response(
-            embed=send_embed("Handle not identified", f"Looks like {handle_name.mention} has not identified handle"))
+            embed=await send_embed("Handle not identified", f"Looks like {handle_name.mention} has not identified handle"))
         return
     if duelrating is not None and (duelrating < 800 or duelrating > 3500 or duelrating % 100 != 0):
         await Interaction.edit_original_response("Rating dhang se daal")
@@ -1166,11 +1165,11 @@ async def duel_challenge(Interaction: discord.Interaction, handle_name: discord.
         # user4=row[1][0]
 
         await Interaction.edit_original_response(
-            embed=send_embed("Cant be done", "One of the user is already in a duel "))
+            embed=await send_embed("Cant be done", "One of the user is already in a duel "))
         return
     desc = f"{handle_name.mention} you are being challenged by {Interaction.user.mention}"
     ti = f"Lets Battle it out"
-    await Interaction.edit_original_response(embed=send_embed(ti, desc), view=ButtonYesNo(Interaction, 30, handle_name))
+    await Interaction.edit_original_response(embed=await send_embed(ti, desc), view=ButtonYesNo(Interaction, 30, handle_name))
 
 
 @bot.tree.command(name='my_duel_rank', description='Gives your duel rank')
@@ -1187,11 +1186,11 @@ async def my_duel_rank(Interaction: discord.Interaction):
         if row[0] == str(user):
             desc = f"Your rank is {count} with a score of {row[1]}"
             ti = "Duel Rank!"
-            await Interaction.edit_original_response(embed=send_embed(ti, desc))
+            await Interaction.edit_original_response(embed=await send_embed(ti, desc))
             return
     desc = f"You have never been in a duel"
     ti = "No duel record found"
-    await Interaction.edit_original_response(embed=send_embed(ti, desc))
+    await Interaction.edit_original_response(embed=await send_embed(ti, desc))
 
 
 @bot.tree.command(name='my_solo_rank', description='Gives your solo rank')
@@ -1207,11 +1206,11 @@ async def my_solo_rank(Interaction: discord.Interaction):
         if row[0] == str(user):
             desc = f"Your rank is {count} with a score of {row[1]}"
             ti = "Solo Rank!"
-            await Interaction.edit_original_response(embed=send_embed(ti, desc))
+            await Interaction.edit_original_response(embed=await send_embed(ti, desc))
             return
     desc = f"You have never been in a solo"
     ti = "No solo record found"
-    await Interaction.edit_original_response(embed=send_embed(ti, desc))
+    await Interaction.edit_original_response(embed=await send_embed(ti, desc))
 
 
 @bot.tree.command(name='daily_problem', description='isse MODS daily problems bhejenge :)')
@@ -1271,7 +1270,7 @@ async def mashup(Interaction: discord.Interaction, p1: str, div: int):
             ti = "Handle unidentified"
             userw = await bot.fetch_user(user)
             desc = f"Handle for {userw.mention} is not identified please use  /handle_identify"
-            await Interaction.edit_original_response(embed=send_embed(ti, desc))
+            await Interaction.edit_original_response(embed=await send_embed(ti, desc))
             return
     problemset = []
 
@@ -1281,7 +1280,7 @@ async def mashup(Interaction: discord.Interaction, p1: str, div: int):
         row = cur.fetchall()
         handle = str(row[0][0])
         print(handle)
-        pr = get_user_problems(handle)
+        pr = await get_user_problems(handle)
         problemset = pr + problemset
 
     conn.commit()
@@ -1294,12 +1293,12 @@ async def mashup(Interaction: discord.Interaction, p1: str, div: int):
         rating5 = random.choice([1700, 1800, 1900])
         rating6 = random.choice([2000, 2100, 2200])
         list = []
-        problem1 = random.choice(get_user_unsolved_problems(problemset, rating1, list))
-        problem2 = random.choice(get_user_unsolved_problems(problemset, rating2, list))
-        problem3 = random.choice(get_user_unsolved_problems(problemset, rating3, list))
-        problem4 = random.choice(get_user_unsolved_problems(problemset, rating4, list))
-        problem5 = random.choice(get_user_unsolved_problems(problemset, rating5, list))
-        problem6 = random.choice(get_user_unsolved_problems(problemset, rating6, list))
+        problem1 = random.choice(await get_user_unsolved_problems(problemset, rating1, list))
+        problem2 = random.choice(await get_user_unsolved_problems(problemset, rating2, list))
+        problem3 = random.choice(await get_user_unsolved_problems(problemset, rating3, list))
+        problem4 = random.choice(await get_user_unsolved_problems(problemset, rating4, list))
+        problem5 = random.choice(await get_user_unsolved_problems(problemset, rating5, list))
+        problem6 = random.choice(await get_user_unsolved_problems(problemset, rating6, list))
         link1 = "https://codeforces.com/contest/" + str(problem1[0]) + "/problem/" + str(problem1[1])
         link2 = "https://codeforces.com/contest/" + str(problem2[0]) + "/problem/" + str(problem2[1])
         link3 = "https://codeforces.com/contest/" + str(problem3[0]) + "/problem/" + str(problem3[1])
@@ -1309,7 +1308,7 @@ async def mashup(Interaction: discord.Interaction, p1: str, div: int):
         ti = "LessGoooo"
         desc = f" A. [{problem1[2]}]({link1}) \n B. [{problem2[2]}]({link2}) \n C. [{problem3[2]}]({link3}) \n D. " \
                f"[{problem4[2]}]({link4}) \n E. [{problem5[2]}]({link5}) \n F. [{problem6[2]}]({link6}) "
-        embebd = send_embed(ti, desc)
+        embebd = await send_embed(ti, desc)
 
         await Interaction.edit_original_response(embed=embebd)
     elif div == 3:
@@ -1320,12 +1319,12 @@ async def mashup(Interaction: discord.Interaction, p1: str, div: int):
         rating5 = random.choice([1400, 1500, 1600])
         rating6 = random.choice([1700, 1800])
         list = []
-        problem1 = random.choice(get_user_unsolved_problems(problemset, rating1, list))
-        problem2 = random.choice(get_user_unsolved_problems(problemset, rating2, list))
-        problem3 = random.choice(get_user_unsolved_problems(problemset, rating3, list))
-        problem4 = random.choice(get_user_unsolved_problems(problemset, rating4, list))
-        problem5 = random.choice(get_user_unsolved_problems(problemset, rating5, list))
-        problem6 = random.choice(get_user_unsolved_problems(problemset, rating6, list))
+        problem1 = random.choice(await get_user_unsolved_problems(problemset, rating1, list))
+        problem2 = random.choice(await get_user_unsolved_problems(problemset, rating2, list))
+        problem3 = random.choice(await get_user_unsolved_problems(problemset, rating3, list))
+        problem4 = random.choice(await get_user_unsolved_problems(problemset, rating4, list))
+        problem5 = random.choice(await get_user_unsolved_problems(problemset, rating5, list))
+        problem6 = random.choice(await get_user_unsolved_problems(problemset, rating6, list))
         link1 = "https://codeforces.com/contest/" + str(problem1[0]) + "/problem/" + str(problem1[1])
         link2 = "https://codeforces.com/contest/" + str(problem2[0]) + "/problem/" + str(problem2[1])
         link3 = "https://codeforces.com/contest/" + str(problem3[0]) + "/problem/" + str(problem3[1])
@@ -1335,7 +1334,7 @@ async def mashup(Interaction: discord.Interaction, p1: str, div: int):
         ti = "LessGoooo"
         desc = f" A. [{problem1[2]}]({link1}) \n B. [{problem2[2]}]({link2}) \n C. [{problem3[2]}]({link3}) \n D. " \
                f"[{problem4[2]}]({link4}) \n E. [{problem5[2]}]({link5}) \n F. [{problem6[2]}]({link6})"
-        embebd = send_embed(ti, desc)
+        embebd =await send_embed(ti, desc)
 
         await Interaction.edit_original_response(embed=embebd)
     elif div == 1:
@@ -1348,12 +1347,12 @@ async def mashup(Interaction: discord.Interaction, p1: str, div: int):
         rating5 = random.choice([1200, 1300])
         rating6 = random.choice([1400, 1500])
         list = []
-        problem1 = random.choice(get_user_unsolved_problems(problemset, rating1, list))
-        problem2 = random.choice(get_user_unsolved_problems(problemset, rating2, list))
-        problem3 = random.choice(get_user_unsolved_problems(problemset, rating3, list))
-        problem4 = random.choice(get_user_unsolved_problems(problemset, rating4, list))
-        problem5 = random.choice(get_user_unsolved_problems(problemset, rating5, list))
-        problem6 = random.choice(get_user_unsolved_problems(problemset, rating6, list))
+        problem1 = random.choice(await get_user_unsolved_problems(problemset, rating1, list))
+        problem2 = random.choice(await get_user_unsolved_problems(problemset, rating2, list))
+        problem3 = random.choice(await get_user_unsolved_problems(problemset, rating3, list))
+        problem4 = random.choice(await get_user_unsolved_problems(problemset, rating4, list))
+        problem5 = random.choice(await get_user_unsolved_problems(problemset, rating5, list))
+        problem6 = random.choice(await get_user_unsolved_problems(problemset, rating6, list))
         link1 = "https://codeforces.com/contest/" + str(problem1[0]) + "/problem/" + str(problem1[1])
         link2 = "https://codeforces.com/contest/" + str(problem2[0]) + "/problem/" + str(problem2[1])
         link3 = "https://codeforces.com/contest/" + str(problem3[0]) + "/problem/" + str(problem3[1])
@@ -1363,7 +1362,7 @@ async def mashup(Interaction: discord.Interaction, p1: str, div: int):
         ti = "LessGoooo"
         desc = f" A. [{problem1[2]}]({link1}) \n B. [{problem2[2]}]({link2}) \n C. [{problem3[2]}]({link3}) \n D. " \
                f"[{problem4[2]}]({link4}) \n E. [{problem5[2]}]({link5}) \n F. [{problem6[2]}]({link6})"
-        embebd = send_embed(ti, desc)
+        embebd =await send_embed(ti, desc)
 
         await Interaction.edit_original_response(embed=embebd)
     else:
@@ -1388,7 +1387,7 @@ async def graph_compare(Interaction: discord.Interaction, p1: str):
         if not row1:
             ti = "Handle unidentified"
             desc = f"Handle for {user.mention} is not identified please use  /handle_identify"
-            await Interaction.edit_original_response(embed=send_embed(ti, desc))
+            await Interaction.edit_original_response(embed=await send_embed(ti, desc))
             return
         mainlist.append(row1[0][0])
 
@@ -1412,7 +1411,7 @@ async def graph_compare(Interaction: discord.Interaction, p1: str):
             newrat.append(newrating["newRating"])
 
         for dates in details_api:
-            date.append(datetime.strptime(unixTimeToHumanReadableVaibhav(dates["ratingUpdateTimeSeconds"]), "%Y-%m-%d"))
+            date.append(datetime.strptime(await unixTimeToHumanReadableVaibhav(dates["ratingUpdateTimeSeconds"]), "%Y-%m-%d"))
 
         dates = matplotlib.dates.date2num(date)
         matplotlib.pyplot.plot_date(dates, newrat, linestyle='solid', label=handle)
