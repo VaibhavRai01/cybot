@@ -116,14 +116,14 @@ class ButtonYesNo(View):
             rows = cur.fetchall()
             handle1 = rows[0][0]
             handle2 = rows[1][0]
-            user1doneporblems = await get_user_problems(handle1)
-            user2doneproblems = await get_user_problems(handle2)
+            user1doneporblems = get_user_problems(handle1)
+            user2doneproblems = get_user_problems(handle2)
             alldoneproblems = user1doneporblems + user2doneproblems
             alldoneproblems = list(alldoneproblems)
             if duelrating is not None and (duelrating < 800 or duelrating > 3500 or duelrating % 100 != 0):
                 await self.inter.edit_original_response("Rating dhang se daal")
             else:
-                unsolvedprobs = await get_user_unsolved_problems(alldoneproblems, duelrating, None)
+                unsolvedprobs = get_user_unsolved_problems(alldoneproblems, duelrating, None)
                 if not unsolvedprobs:
                     await self.inter.edit_original_response(f"Nahi hai bhai question Bank me", view=None)
                     return
@@ -192,7 +192,7 @@ class ButtonYesNoduel_end(View):
             await interaction.response.send_message('Tere lie nahi tha bhai', ephemeral=True)
 
 
-async def get_user_problems(handle):
+def get_user_problems(handle):
     user_problems = []
     url = f"https://codeforces.com/api/user.status?handle={handle}"
     response = requests.get(url)
@@ -208,7 +208,7 @@ async def get_user_problems(handle):
     return user_problems
 
 
-async def get_user_unsolved_problems(user_problems, rating, tags):
+def get_user_unsolved_problems(user_problems, rating, tags):
     unsolved_user_problems = []
     if rating is None:
         cur.execute('SELECT ContestID, Index, Rating, Tags from PROBLEMS')
@@ -243,7 +243,7 @@ async def get_user_unsolved_problems(user_problems, rating, tags):
     return unsolved_user_problems
 
 
-async def unixTimeToHumanReadableVaibhav(seconds):
+def unixTimeToHumanReadableVaibhav(seconds):
     # Save the time in Human
     # readable format
     ans = ""
@@ -368,11 +368,12 @@ bot_button_message_id = None
 async def on_ready():
     synced = await bot.tree.sync()
     print(f"Slash commands synced and lenght is " + str(len(synced)) + "commnads")
-    await reminder.start()
-    await daily_problems.start()
+    
+    #await reminder.start()
+    #await daily_problems.start()
 
 
-async def unixToHumanandUtkarsh(seconds):
+def unixToHumanandUtkarsh(seconds):
     ans = ""
     extraTime = seconds % (24 * 60 * 60)
     hours = extraTime // 3600
@@ -396,7 +397,7 @@ async def unixToHumanandUtkarsh(seconds):
     return ans
 
 
-async def unixTimeToHumanReadable(seconds):
+def unixTimeToHumanReadable(seconds):
     # Save the time in Human
     # readable format
     ans = []
@@ -531,7 +532,7 @@ async def reminder():
             contest = r['name']
         if r['phase'] == "FINISHED":
             break
-    t1 = await unixTimeToHumanReadable(ts)
+    t1 = unixTimeToHumanReadable(ts)
     now = datetime.now()
     now1 = str(now)
     now1 = now1.split(".")
@@ -563,7 +564,7 @@ async def daily_problems():
         solved.append([row[0], row[1]])
     rating = random.choice([800, 900, 1000])
     tags = []
-    unsolved = await get_user_unsolved_problems(solved, rating, tags)
+    unsolved = get_user_unsolved_problems(solved, rating, tags)
     unsolved1 = random.sample(unsolved, 2)
     link1 = "https://codeforces.com/contest/" + str(unsolved1[0][0]) + "/problem/" + str(unsolved1[0][1])
     link2 = "https://codeforces.com/contest/" + str(unsolved1[1][0]) + "/problem/" + str(unsolved1[1][1])
@@ -577,7 +578,7 @@ async def daily_problems():
     await mes2.add_reaction(emoji)
 
 
-async def asking_compilation_error(Interaction, handlename, random_key):
+def asking_compilation_error(Interaction, handlename, random_key):
     handlemention = Interaction.user
     print(handlename)
 
@@ -633,7 +634,7 @@ async def upcoming_contests(Interaction: discord.Interaction):
     for r in result:
         if r['phase'] == "BEFORE":
             ts = r['startTimeSeconds']
-            t1 = await unixTimeToHumanReadable(ts)
+            t1 = unixTimeToHumanReadable(ts)
             now = datetime.now()
             now1 = str(now)
             now1 = now1.split(".")
@@ -689,11 +690,11 @@ async def solo_arise(Interaction: discord.Interaction, rating: int = None, tags:
         await Interaction.edit_original_response(embed=embed)
         return
     else:
-        user_probs = await get_user_problems(row[0][0])
+        user_probs = get_user_problems(row[0][0])
         if rating is not None and (rating < 800 or rating > 3500 or rating % 100 != 0):
             await Interaction.edit_original_response("Rating dhang se daal")
         else:
-            unsolvedprobs = await get_user_unsolved_problems(user_probs, rating, taglis)
+            unsolvedprobs = get_user_unsolved_problems(user_probs, rating, taglis)
             if not unsolvedprobs:
                 await Interaction.edit_original_response(f"Nahi hai bhai question Bank me")
                 return
@@ -745,7 +746,7 @@ async def solo_end(Interaction: discord.Interaction):
         cur.execute("UPDATE SoloLeaderboard set score = %s where DiscordId = %s", (newscore, str(Interaction.user.id),))
         conn.commit()
         t2 = rows[0][4]
-        t1 = await unixTimeToHumanReadable(unixt1)
+        t1 = unixTimeToHumanReadable(unixt1)
         datetime_str = str(t1[1]) + "/" + str(t1[2]) + "/" + str(t1[0]) + " " + str(t1[3]) + ":" + str(
             t1[4]) + ":" + str(t1[5])
         datetime_object = datetime.strptime(datetime_str, '%m/%d/%Y %H:%M:%S')
@@ -809,7 +810,7 @@ async def handle_identify(Interaction: discord.Interaction, handle_name: str):
     response = requests.get(linktouser)
     if response.status_code == 200:
         random_key = random.choice(list(handlesetproblems.keys()))
-        embed = await asking_compilation_error(Interaction, CFID, random_key)
+        embed = asking_compilation_error(Interaction, CFID, random_key)
         await Interaction.edit_original_response(embed=embed)
         await asyncio.sleep(60)
         linktorecentsub = "https://codeforces.com/api/user.status?handle=" + CFID + "&from=1&count=1"
@@ -879,7 +880,7 @@ async def handle_change(Interaction: discord.Interaction, handle_name: str):
         response = requests.get(linktouser)
         if response.status_code == 200:
             random_key = random.choice(list(handlesetproblems.keys()))
-            embed =await asking_compilation_error(Interaction, CFID, random_key)
+            embed =asking_compilation_error(Interaction, CFID, random_key)
             await Interaction.edit_original_response(embed=embed)
             await asyncio.sleep(60)
             linktorecentsub = "https://codeforces.com/api/user.status?handle=" + CFID + "&from=1&count=1"
@@ -984,7 +985,7 @@ async def duel_end(Interaction: discord.Interaction):
                             (newscore, handle2,))
                 conn.commit()
                 t2 = row[0][4]
-                t1 = await unixTimeToHumanReadable(unixt2)
+                t1 = unixTimeToHumanReadable(unixt2)
                 datetime_str = str(t1[1]) + "/" + str(t1[2]) + "/" + str(t1[0]) + " " + str(t1[3]) + ":" + str(
                     t1[4]) + ":" + str(t1[5])
                 datetime_object = datetime.strptime(datetime_str, '%m/%d/%Y %H:%M:%S')
@@ -1012,7 +1013,7 @@ async def duel_end(Interaction: discord.Interaction):
                             (newscore, handle2,))
                 conn.commit()
                 t2 = row[0][4]
-                t1 = await unixTimeToHumanReadable(unixt1)
+                t1 = unixTimeToHumanReadable(unixt1)
                 datetime_str = str(t1[1]) + "/" + str(t1[2]) + "/" + str(t1[0]) + " " + str(t1[3]) + ":" + str(
                     t1[4]) + ":" + str(t1[5])
                 datetime_object = datetime.strptime(datetime_str, '%m/%d/%Y %H:%M:%S')
@@ -1046,7 +1047,7 @@ async def duel_end(Interaction: discord.Interaction):
                         (newscore, handle2,))
             conn.commit()
             t2 = row[0][4]
-            t1 = await unixTimeToHumanReadable(unixt1)
+            t1 = unixTimeToHumanReadable(unixt1)
             datetime_str = str(t1[1]) + "/" + str(t1[2]) + "/" + str(t1[0]) + " " + str(t1[3]) + ":" + str(
                 t1[4]) + ":" + str(t1[5])
             datetime_object = datetime.strptime(datetime_str, '%m/%d/%Y %H:%M:%S')
@@ -1075,7 +1076,7 @@ async def duel_end(Interaction: discord.Interaction):
                         (newscore, handle2,))
             conn.commit()
             t2 = row[0][4]
-            t1 =await unixTimeToHumanReadable(unixt2)
+            t1 =unixTimeToHumanReadable(unixt2)
             datetime_str = str(t1[1]) + "/" + str(t1[2]) + "/" + str(t1[0]) + " " + str(t1[3]) + ":" + str(
                 t1[4]) + ":" + str(t1[5])
             datetime_object = datetime.strptime(datetime_str, '%m/%d/%Y %H:%M:%S')
@@ -1280,7 +1281,7 @@ async def mashup(Interaction: discord.Interaction, p1: str, div: int):
         row = cur.fetchall()
         handle = str(row[0][0])
         print(handle)
-        pr = await get_user_problems(handle)
+        pr = get_user_problems(handle)
         problemset = pr + problemset
 
     conn.commit()
@@ -1293,12 +1294,12 @@ async def mashup(Interaction: discord.Interaction, p1: str, div: int):
         rating5 = random.choice([1700, 1800, 1900])
         rating6 = random.choice([2000, 2100, 2200])
         list = []
-        problem1 = random.choice(await get_user_unsolved_problems(problemset, rating1, list))
-        problem2 = random.choice(await get_user_unsolved_problems(problemset, rating2, list))
-        problem3 = random.choice(await get_user_unsolved_problems(problemset, rating3, list))
-        problem4 = random.choice(await get_user_unsolved_problems(problemset, rating4, list))
-        problem5 = random.choice(await get_user_unsolved_problems(problemset, rating5, list))
-        problem6 = random.choice(await get_user_unsolved_problems(problemset, rating6, list))
+        problem1 = random.choice(get_user_unsolved_problems(problemset, rating1, list))
+        problem2 = random.choice(get_user_unsolved_problems(problemset, rating2, list))
+        problem3 = random.choice(get_user_unsolved_problems(problemset, rating3, list))
+        problem4 = random.choice(get_user_unsolved_problems(problemset, rating4, list))
+        problem5 = random.choice(get_user_unsolved_problems(problemset, rating5, list))
+        problem6 = random.choice(get_user_unsolved_problems(problemset, rating6, list))
         link1 = "https://codeforces.com/contest/" + str(problem1[0]) + "/problem/" + str(problem1[1])
         link2 = "https://codeforces.com/contest/" + str(problem2[0]) + "/problem/" + str(problem2[1])
         link3 = "https://codeforces.com/contest/" + str(problem3[0]) + "/problem/" + str(problem3[1])
@@ -1319,12 +1320,12 @@ async def mashup(Interaction: discord.Interaction, p1: str, div: int):
         rating5 = random.choice([1400, 1500, 1600])
         rating6 = random.choice([1700, 1800])
         list = []
-        problem1 = random.choice(await get_user_unsolved_problems(problemset, rating1, list))
-        problem2 = random.choice(await get_user_unsolved_problems(problemset, rating2, list))
-        problem3 = random.choice(await get_user_unsolved_problems(problemset, rating3, list))
-        problem4 = random.choice(await get_user_unsolved_problems(problemset, rating4, list))
-        problem5 = random.choice(await get_user_unsolved_problems(problemset, rating5, list))
-        problem6 = random.choice(await get_user_unsolved_problems(problemset, rating6, list))
+        problem1 = random.choice(get_user_unsolved_problems(problemset, rating1, list))
+        problem2 = random.choice(get_user_unsolved_problems(problemset, rating2, list))
+        problem3 = random.choice(get_user_unsolved_problems(problemset, rating3, list))
+        problem4 = random.choice(get_user_unsolved_problems(problemset, rating4, list))
+        problem5 = random.choice(get_user_unsolved_problems(problemset, rating5, list))
+        problem6 = random.choice(get_user_unsolved_problems(problemset, rating6, list))
         link1 = "https://codeforces.com/contest/" + str(problem1[0]) + "/problem/" + str(problem1[1])
         link2 = "https://codeforces.com/contest/" + str(problem2[0]) + "/problem/" + str(problem2[1])
         link3 = "https://codeforces.com/contest/" + str(problem3[0]) + "/problem/" + str(problem3[1])
@@ -1347,12 +1348,12 @@ async def mashup(Interaction: discord.Interaction, p1: str, div: int):
         rating5 = random.choice([1200, 1300])
         rating6 = random.choice([1400, 1500])
         list = []
-        problem1 = random.choice(await get_user_unsolved_problems(problemset, rating1, list))
-        problem2 = random.choice(await get_user_unsolved_problems(problemset, rating2, list))
-        problem3 = random.choice(await get_user_unsolved_problems(problemset, rating3, list))
-        problem4 = random.choice(await get_user_unsolved_problems(problemset, rating4, list))
-        problem5 = random.choice(await get_user_unsolved_problems(problemset, rating5, list))
-        problem6 = random.choice(await get_user_unsolved_problems(problemset, rating6, list))
+        problem1 = random.choice(get_user_unsolved_problems(problemset, rating1, list))
+        problem2 = random.choice(get_user_unsolved_problems(problemset, rating2, list))
+        problem3 = random.choice(get_user_unsolved_problems(problemset, rating3, list))
+        problem4 = random.choice(get_user_unsolved_problems(problemset, rating4, list))
+        problem5 = random.choice(get_user_unsolved_problems(problemset, rating5, list))
+        problem6 = random.choice(get_user_unsolved_problems(problemset, rating6, list))
         link1 = "https://codeforces.com/contest/" + str(problem1[0]) + "/problem/" + str(problem1[1])
         link2 = "https://codeforces.com/contest/" + str(problem2[0]) + "/problem/" + str(problem2[1])
         link3 = "https://codeforces.com/contest/" + str(problem3[0]) + "/problem/" + str(problem3[1])
@@ -1410,7 +1411,7 @@ async def graph_compare(Interaction: discord.Interaction, p1: str):
             newrat.append(newrating["newRating"])
 
         for dates in details_api:
-            date.append(datetime.strptime(await unixTimeToHumanReadableVaibhav(dates["ratingUpdateTimeSeconds"]), "%Y-%m-%d"))
+            date.append(datetime.strptime(unixTimeToHumanReadableVaibhav(dates["ratingUpdateTimeSeconds"]), "%Y-%m-%d"))
 
         dates = matplotlib.dates.date2num(date)
         matplotlib.pyplot.plot_date(dates, newrat, linestyle='solid', label=handle)
