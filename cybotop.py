@@ -360,7 +360,7 @@ async def send_embed(ti, desc):
     return embed
 
 
-bot = commands.Bot(command_prefix="!", intents=intents, )
+bot = commands.Bot(command_prefix="/", intents=intents, )
 bot_button_message_id = None
 
 
