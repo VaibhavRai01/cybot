@@ -1,6 +1,5 @@
-
+import subprocess
 import discord
-import grequests
 import matplotlib
 from matplotlib import pyplot
 from matplotlib import dates
@@ -1465,4 +1464,4 @@ client = discord.Client(intents=intents)
 
 # Fetch the token from the 'TOKEN' environment variable
 tokenval = os.environ.get('token')
-os.run(tokenval)
+subprocess.run(tokenval)
