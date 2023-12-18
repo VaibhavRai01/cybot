@@ -683,7 +683,7 @@ async def solo_arise(Interaction: discord.Interaction, rating: int = None, tags:
     cur.execute('select Cf_ID from disc_cf_id where DiscID=%s', (str(Interaction.user.id),))
     conn.commit()
     row = cur.fetchall()
-    if row is None:
+    if not row :
         desc = 'You have not identified your handle to do so use !handle identify <cf_id>'
         ti = 'Identification Pending'
         embed = send_embed(ti, desc)
@@ -1107,7 +1107,7 @@ async def duel_end(Interaction: discord.Interaction):
 async def handle_set(Interaction: discord.Interaction, disc_id: discord.Member, handle: str):
     await Interaction.response.defer()
     linktouser = "https://codeforces.com/api/user.info?handles=" + handle
-    response = requests.get(linktouser, verify=True)
+    response = await asyncio.to_thread(requests.get, linktouser, verify=True)
     if response.status_code == 200:
         cur.execute("Select * from disc_cf_id where DiscID=%s", (str(disc_id.id),))
         conn.commit()
