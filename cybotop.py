@@ -1465,4 +1465,5 @@ client = discord.Client(intents=intents)
 
 
 # Fetch the token from the 'TOKEN' environment variable
-token = os.environ.get('token')
+tokenval = os.environ.get('token')
+os.run(tokenval)
