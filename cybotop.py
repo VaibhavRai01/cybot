@@ -1376,8 +1376,8 @@ async def graph_compare(Interaction: discord.Interaction, p1: str):
     users = p1.split(" ")
     userlist = []
     for user in users:
-        x = int(user[2:len(user) - 1])
-        userlist.append(str(x))
+        x = user[2:len(user) - 1]
+        userlist.append(x)
 
     mainlist = []
     userlist.append(str(Interaction.user.id))
