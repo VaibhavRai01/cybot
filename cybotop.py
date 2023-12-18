@@ -22,7 +22,8 @@ from discord.ext.commands import MemberConverter
 from datetime import datetime, timedelta
 from discord.ext import tasks
 
-conn = psycopg2.connect(database="bot", user="postgres", password="01234567", host="localhost", port="5432")
+conn = psycopg2.connect(database="bot_mbx0", user="cybot", password="TdF93F0D7Hg26Wr9icHwjJpOnah9lpe2", host="dpg-cm0167eg1b2c73cl5ke0-a", port="5432")
+
 cur = conn.cursor()
 cur.execute('create table if not exists scoringyess ( UId text primary key, Score integer )')
 conn.commit()
@@ -1456,4 +1457,4 @@ async def graph_compare(Interaction: discord.Interaction, p1: str):
 # #                 await channel.send(str(problem[i]) + '\n')
 
 
-bot.run(os.environ["TOKEN"])
+bot.run(process.env.token)
