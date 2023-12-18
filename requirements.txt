@@ -1,6 +1,7 @@
+python==3.9
 discord.py==2.0.0
 grequests==0.6.0
 matplotlib==3.4.3
 psycopg2==2.9.2
 requests==2.26.0
-gevent==21.12.0
+gevent==1.6.5
