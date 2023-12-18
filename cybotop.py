@@ -625,7 +625,7 @@ def changearg(arg):
 
 @bot.tree.command(name="upcoming_contests", description="Gives you upcoming contests from codeforces")
 async def upcoming_contests(Interaction: discord.Interaction):
-    await Interaction.response.defer()
+    
     url = "https://codeforces.com/api/contest.list?"
     response = requests.get(url, verify=True)
     data = response.json()
@@ -667,7 +667,7 @@ async def upcoming_contests(Interaction: discord.Interaction):
 @app_commands.describe(tags='Enter upto 5 tags seprated by commas and then a space')
 @app_commands.describe(rating='Enter the rating of problem you want to solve ')
 async def solo_arise(Interaction: discord.Interaction, rating: int = None, tags: str = None):
-    await Interaction.response.defer()
+    
     taglis = []
     if tags is not None:
         taglis = tags.split(', ')
@@ -715,7 +715,7 @@ async def solo_arise(Interaction: discord.Interaction, rating: int = None, tags:
 
 @bot.tree.command(name="solo_end", description="Ends your ongoing solo")
 async def solo_end(Interaction: discord.Interaction):
-    await Interaction.response.defer()
+    
     user = str(Interaction.user.id)
     cur.execute('select * from sololevelling where userdisc=%s', (user,))
     conn.commit()
@@ -776,7 +776,7 @@ async def solo_end(Interaction: discord.Interaction):
 
 @bot.tree.command(name="solo_top", description="Top 10 leaderboard")
 async def solo_top(Interaction: discord.Interaction):
-    await Interaction.response.defer()
+    
     cur.execute("SELECT * from SoloLeaderboard order by score desc LIMIT 10")
     rows = cur.fetchall()
     conn.commit()
@@ -795,7 +795,7 @@ async def solo_top(Interaction: discord.Interaction):
 @bot.tree.command(name='handle_identify', description='Identify your handle and get started')
 @app_commands.describe(handle_name="Enter the handle name")
 async def handle_identify(Interaction: discord.Interaction, handle_name: str):
-    await Interaction.response.defer()
+    
     CFID = handle_name
     cur.execute('select * from disc_cf_id where DiscID=%s', (str(Interaction.user.id),))
     conn.commit()
@@ -865,7 +865,7 @@ async def handle_identify(Interaction: discord.Interaction, handle_name: str):
 @bot.tree.command(name='handle_change', description='Updates your Codeforces handle ')
 @app_commands.describe(handle_name="Enter the handle name")
 async def handle_change(Interaction: discord.Interaction, handle_name: str):
-    await Interaction.response.defer()
+    
     CFID = handle_name
     cur.execute('select * from disc_cf_id where DiscID=%s', (str(Interaction.user.id),))
     conn.commit()
@@ -925,7 +925,7 @@ async def handle_change(Interaction: discord.Interaction, handle_name: str):
 
 @bot.tree.command(name='duel_end', description='Ends the duel you are currently in')
 async def duel_end(Interaction: discord.Interaction):
-    await Interaction.response.defer()
+    
     user = Interaction.user.id
     cur.execute("select * from duelchallenge where user1=%s or user2=%s", (str(user), str(user),))
     conn.commit()
@@ -1105,7 +1105,7 @@ async def duel_end(Interaction: discord.Interaction):
 
 @bot.tree.command(name='handle_set', description='Set handle manually(only mod)')
 async def handle_set(Interaction: discord.Interaction, disc_id: discord.Member, handle: str):
-    await Interaction.response.defer()
+    
     linktouser = "https://codeforces.com/api/user.info?handles=" + handle
     response = await asyncio.to_thread(requests.get, linktouser, verify=True)
     if response.status_code == 200:
@@ -1129,7 +1129,7 @@ async def handle_set(Interaction: discord.Interaction, disc_id: discord.Member, 
 @bot.tree.command(name='duel_challenge', description='Challenge other user for a 1v1 battle')
 @app_commands.describe(handle_name="Mention the discord ID of user you want to battle")
 async def duel_challenge(Interaction: discord.Interaction, handle_name: discord.Member, rating: int = None):
-    await Interaction.response.defer()
+    
     if Interaction.user.id == handle_name.id:
         ti = "Cannot challenge yourself"
         desc = f"Lonely? Try solo"
@@ -1175,7 +1175,7 @@ async def duel_challenge(Interaction: discord.Interaction, handle_name: discord.
 
 @bot.tree.command(name='my_duel_rank', description='Gives your duel rank')
 async def my_duel_rank(Interaction: discord.Interaction):
-    await Interaction.response.defer()
+    
     user = Interaction.user.id
     cur.execute('Select * from DuelLeaderboard order by score DESC')
     conn.commit()
@@ -1196,7 +1196,7 @@ async def my_duel_rank(Interaction: discord.Interaction):
 
 @bot.tree.command(name='my_solo_rank', description='Gives your solo rank')
 async def my_solo_rank(Interaction: discord.Interaction):
-    await Interaction.response.defer()
+    
     user = Interaction.user.id
     cur.execute('Select * from SoloLeaderboard order by score DESC')
     conn.commit()
@@ -1216,7 +1216,7 @@ async def my_solo_rank(Interaction: discord.Interaction):
 
 @bot.tree.command(name='daily_problem', description='isse MODS daily problems bhejenge :)')
 async def daily_problem(Interaction: discord.Interaction, contestid: str, contestindex: str):
-    await Interaction.response.defer()
+    
     if Interaction.channel_id != 1056929299501953104:
         await Interaction.edit_original_response(
             content="This command cannot be used here OR you are not the chosen one ", ephemeral=True)
@@ -1236,7 +1236,7 @@ async def daily_problem(Interaction: discord.Interaction, contestid: str, contes
 
 @bot.tree.command(name='reaction', description='isse MODS daily problems ke reactions lenge :)')
 async def reaction(Interaction: discord.Interaction):
-    await Interaction.response.defer()
+    
     cur.execute("SELECT * from reactions")
     row = cur.fetchall()
     conn.commit()
@@ -1254,7 +1254,7 @@ async def reaction(Interaction: discord.Interaction):
 @bot.tree.command(name='mashup', description='Upto 5 users get a custom contest where you can participate')
 @app_commands.describe(div="2/3/4")
 async def mashup(Interaction: discord.Interaction, p1: str, div: int):
-    await Interaction.response.defer()
+    
 
     users = p1.split(" ")
     userlist = []
@@ -1372,7 +1372,7 @@ async def mashup(Interaction: discord.Interaction, p1: str, div: int):
 
 @bot.tree.command(name='graph_compare', description='Mention Discord Ids of whom you want to compare rating curve')
 async def graph_compare(Interaction: discord.Interaction, p1: str):
-    await Interaction.response.defer()
+    
     users = p1.split(" ")
     userlist = []
     for user in users:
