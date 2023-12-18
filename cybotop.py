@@ -809,7 +809,7 @@ async def handle_identify(Interaction: discord.Interaction, handle_name: str):
     linktouser = "https://codeforces.com/api/user.info?handles=" + CFID
     response = requests.get(linktouser)
     if response.status_code == 200:
-        random_key = random.choice(list(handlesetproblems.keys()))
+        random_key = await random.choice(list(handlesetproblems.keys()))
         embed = asking_compilation_error(Interaction, CFID, random_key)
         await Interaction.edit_original_response(embed=embed)
         await asyncio.sleep(60)
