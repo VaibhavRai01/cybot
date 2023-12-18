@@ -195,7 +195,7 @@ class ButtonYesNoduel_end(View):
 def get_user_problems(handle):
     user_problems = []
     url = f"https://codeforces.com/api/user.status?handle={handle}"
-    response = requests.get(url)
+    response = requests.get(url, verify=True)
     data = response.json()
     result = data['result']
 
@@ -521,7 +521,7 @@ def unixTimeToHumanReadable(seconds):
 async def reminder():
     url = "https://codeforces.com/api/contest.list?"
     channel = bot.get_channel(1056929299501953104)
-    response = requests.get(url)
+    response = requests.get(url, verify=True)
     data = response.json()
     result = data['result']
     ts = result[0]['startTimeSeconds']
@@ -627,7 +627,7 @@ def changearg(arg):
 async def upcoming_contests(Interaction: discord.Interaction):
     await Interaction.response.defer()
     url = "https://codeforces.com/api/contest.list?"
-    response = requests.get(url)
+    response = requests.get(url, verify=True)
     data = response.json()
     result = data['result']
     list = []
@@ -727,7 +727,7 @@ async def solo_end(Interaction: discord.Interaction):
         await Interaction.edit_original_response(embed=embed)
         return
     url = f"https://codeforces.com/api/user.status?handle={rows[0][1]}&from=1&count=30"
-    response = requests.get(url)
+    response = requests.get(url, verify=True)
     data = response.json()
     result = data['result']
     booea = 0
@@ -807,14 +807,14 @@ async def handle_identify(Interaction: discord.Interaction, handle_name: str):
         await Interaction.edit_original_response(embed=embed)
         return
     linktouser = "https://codeforces.com/api/user.info?handles=" + CFID
-    response = requests.get(linktouser)
+    response = requests.get(linktouser, verify=True)
     if response.status_code == 200:
         random_key = await random.choice(list(handlesetproblems.keys()))
         embed = asking_compilation_error(Interaction, CFID, random_key)
         await Interaction.edit_original_response(embed=embed)
         await asyncio.sleep(60)
         linktorecentsub = "https://codeforces.com/api/user.status?handle=" + CFID + "&from=1&count=1"
-        response = requests.get(linktorecentsub)
+        response = requests.get(linktorecentsub, verify=True)
         if response.status_code == 200:
             data = response.json()
             final_data = data['result'][0]
@@ -877,14 +877,14 @@ async def handle_change(Interaction: discord.Interaction, handle_name: str):
             await Interaction.edit_original_response(embed=send_embed(ti, desc))
             return
         linktouser = "https://codeforces.com/api/user.info?handles=" + CFID
-        response = requests.get(linktouser)
+        response = requests.get(linktouser, verify=True)
         if response.status_code == 200:
             random_key = await random.choice(list(handlesetproblems.keys()))
             embed =asking_compilation_error(Interaction, CFID, random_key)
             await Interaction.edit_original_response(embed=embed)
             await asyncio.sleep(60)
             linktorecentsub = "https://codeforces.com/api/user.status?handle=" + CFID + "&from=1&count=1"
-            response = requests.get(linktorecentsub)
+            response = requests.get(linktorecentsub, verify=True)
             if response.status_code == 200:
                 data = response.json()
                 final_data = data['result'][0]
@@ -944,7 +944,7 @@ async def duel_end(Interaction: discord.Interaction):
         cur.execute("select Cf_ID from disc_cf_id where DiscID=%s", ((row[0][0]),))
         handle2 = cur.fetchall()
         url = f"https://codeforces.com/api/user.status?handle={handle1[0][0]}&from=1&count=10"
-        response = requests.get(url)
+        response = requests.get(url, verify=True)
         data1 = response.json()
         resultuser1 = data1['result']
         bool1 = 0
@@ -957,7 +957,7 @@ async def duel_end(Interaction: discord.Interaction):
                     unixt1 = res['creationTimeSeconds']
                     break
         url = f"https://codeforces.com/api/user.status?handle={handle2[0][0]}&from=1&count=10"
-        responses = requests.get(url)
+        responses = requests.get(url, verify=True)
         data2 = responses.json()
         resultuser2 = data2['result']
         bool2 = 0
@@ -1107,7 +1107,7 @@ async def duel_end(Interaction: discord.Interaction):
 async def handle_set(Interaction: discord.Interaction, disc_id: discord.Member, handle: str):
     await Interaction.response.defer()
     linktouser = "https://codeforces.com/api/user.info?handles=" + handle
-    response = requests.get(linktouser)
+    response = requests.get(linktouser, verify=True)
     if response.status_code == 200:
         cur.execute("Select * from disc_cf_id where DiscID=%s", (str(disc_id.id),))
         conn.commit()
@@ -1399,7 +1399,7 @@ async def graph_compare(Interaction: discord.Interaction, p1: str):
         link = "https://codeforces.com/api/user.rating?handle="
         link += handle
         print(link)
-        responses = requests.get(link)
+        responses = requests.get(link, verify=True)
         details_api = {}
         for page in responses:
             if page.request.url == link:
