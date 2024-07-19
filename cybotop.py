@@ -23,11 +23,28 @@ from datetime import datetime, timedelta
 from discord.ext import tasks
 import os
 from dotenv import load_dotenv
-
+from aiohttp import web
 # Load environment variables from .env file
 load_dotenv()
+# HTTP server setup
+async def handle(request):
+    return web.Response(text="Bot is running")
 
+app = web.Application()
+app.router.add_get('/', handle)
+
+# Run both the bot and the web server
+async def run():
+    runner = web.AppRunner(app)
+    await runner.setup()
+    site = web.TCPSite(runner, '0.0.0.0', int(os.environ.get('PORT', 8080)))
+    await site.start()
+
+    bot.run(os.getenv('TOKEN'))
+    
 if __name__ == "__main__":
+    
+    
     conn = psycopg2.connect(os.getenv('STRING'))
     cur = conn.cursor()
     cur.execute('create table if not exists scoringyess ( UId text primary key, Score integer )')
@@ -1591,4 +1608,5 @@ if __name__ == "__main__":
 
 
    
-    bot.run(os.getenv('TOKEN'))
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(run())
