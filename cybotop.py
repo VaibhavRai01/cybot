@@ -33,14 +33,7 @@ async def handle(request):
 app = web.Application()
 app.router.add_get('/', handle)
 
-# Run both the bot and the web server
-async def run():
-    runner = web.AppRunner(app)
-    await runner.setup()
-    site = web.TCPSite(runner, '0.0.0.0', int(os.environ.get('PORT', 8080)))
-    await site.start()
-
-    bot.run(os.getenv('TOKEN'))
+    
     
 if __name__ == "__main__":
     
@@ -1608,5 +1601,9 @@ if __name__ == "__main__":
 
 
    
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(run())
+    runner = web.AppRunner(app)
+    await runner.setup()
+    site = web.TCPSite(runner, '0.0.0.0', int(os.environ.get('PORT', 8080)))
+    await site.start()
+
+    bot.run(os.getenv('TOKEN'))
