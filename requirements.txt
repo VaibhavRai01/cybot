@@ -1,7 +1,7 @@
 
-discord.py==2.0.0
-grequests==0.6.0
-matplotlib==3.4.3
-psycopg2==2.9.2
-requests==2.26.0
-gevent==22.10.1
+discord.py
+grequests
+matplotlib
+psycopg2
+requests
+gevent
