@@ -1602,8 +1602,8 @@ if __name__ == "__main__":
 
    
     runner = web.AppRunner(app)
-    await runner.setup()
+    runner.setup()
     site = web.TCPSite(runner, '0.0.0.0', int(os.environ.get('PORT', 8080)))
-    await site.start()
+    site.start()
 
     bot.run(os.getenv('TOKEN'))
