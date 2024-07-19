@@ -44,7 +44,7 @@ async def start_server():
 
 async def main():
     await start_server()
-    bot.run(os.getenv('TOKEN'))
+    
 
     
 if __name__ == "__main__":
@@ -1613,5 +1613,5 @@ if __name__ == "__main__":
 
 
    
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(main())
+    asyncio.run(main())
+    bot.run(os.getenv('TOKEN'))
