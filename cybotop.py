@@ -44,7 +44,7 @@ async def start_server():
 
 async def main():
     await start_server()
-    await bot.start(os.getenv('TOKEN'))
+    await bot.run(os.getenv('TOKEN'))
 
     
 if __name__ == "__main__":
