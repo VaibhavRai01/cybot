@@ -30,10 +30,22 @@ load_dotenv()
 async def handle(request):
     return web.Response(text="Bot is running")
 
+async def handle(request):
+    return web.Response(text="Bot is running")
+
 app = web.Application()
 app.router.add_get('/', handle)
 
-    
+async def start_server():
+    runner = web.AppRunner(app)
+    await runner.setup()
+    site = web.TCPSite(runner, '0.0.0.0', int(os.environ.get('PORT', 8080)))
+    await site.start()
+
+async def main():
+    await start_server()
+    await bot.start(os.getenv('TOKEN'))
+
     
 if __name__ == "__main__":
     
@@ -1601,9 +1613,4 @@ if __name__ == "__main__":
 
 
    
-    runner = web.AppRunner(app)
-    runner.setup()
-    site = web.TCPSite(runner, '0.0.0.0', int(os.environ.get('PORT', 8080)))
-    site.start()
-
-    bot.run(os.getenv('TOKEN'))
+    asyncio.run(main())
