@@ -24,6 +24,7 @@ from discord.ext import tasks
 import os
 from dotenv import load_dotenv
 from aiohttp import web
+import threading
 # Load environment variables from .env file
 load_dotenv()
 # HTTP server setup
@@ -42,9 +43,10 @@ async def start_server():
     site = web.TCPSite(runner, '0.0.0.0', int(os.environ.get('PORT', 8080)))
     await site.start()
 
-async def main():
-    await start_server()
-    
+def run_server():
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    loop.run_until_complete(start_server())
 
     
 if __name__ == "__main__":
@@ -1613,5 +1615,7 @@ if __name__ == "__main__":
 
 
    
-    asyncio.run(main())
+    server_thread = threading.Thread(target=run_server)
+    server_thread.start()
+
     bot.run(os.getenv('TOKEN'))
