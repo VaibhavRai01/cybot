@@ -60,7 +60,7 @@ def run_server():
     loop.run_until_complete(start_server())
     
 async def keep_alive():
-    channel_id = int(os.getenv('CHANNEL_ID'))  # The ID of the channel where the bot will send messages
+    channel_id = int(os.getenv(1062016424635273247))  # The ID of the channel where the bot will send messages
     channel = bot.get_channel(channel_id)
     while True:
         if channel:
