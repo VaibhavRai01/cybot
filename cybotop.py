@@ -27,10 +27,21 @@ from aiohttp import web
 import threading
 # Load environment variables from .env file
 load_dotenv()
-# HTTP server setup
-async def handle(request):
-    return web.Response(text="Bot is running")
 
+@bot.event
+async def on_ready():
+    logging.info(f'Logged in as {bot.user}')
+    asyncio.create_task(keep_alive())  # Start the keep-alive task
+
+@bot.event
+async def on_disconnect():
+    logging.warning('Bot disconnected')
+
+@bot.event
+async def on_reconnect():
+    logging.info('Bot reconnected')
+
+# HTTP server setup
 async def handle(request):
     return web.Response(text="Bot is running")
 
@@ -40,13 +51,24 @@ app.router.add_get('/', handle)
 async def start_server():
     runner = web.AppRunner(app)
     await runner.setup()
-    site = web.TCPSite(runner, '0.0.0.0', int(os.environ.get('PORT', 8080)))
+    site = web.TCPSite(runner, '0.0.0.0', int(os.environ.get('PORT', 4000)))
     await site.start()
 
 def run_server():
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
     loop.run_until_complete(start_server())
+    
+async def keep_alive():
+    channel_id = int(os.getenv('CHANNEL_ID'))  # The ID of the channel where the bot will send messages
+    channel = bot.get_channel(channel_id)
+    while True:
+        if channel:
+            await channel.send('Keep-alive ping!')  # Send a message to the channel
+            logging.info('Keep-alive message sent')
+        else:
+            logging.warning('Channel not found')
+        await asyncio.sleep(60)  # Wait for 60 seconds before sending the next message
 
     
 if __name__ == "__main__":
