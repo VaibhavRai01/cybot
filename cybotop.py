@@ -25,6 +25,7 @@ import os
 from dotenv import load_dotenv
 from aiohttp import web
 import threading
+import logging
 # Load environment variables from .env file
 load_dotenv()
 
