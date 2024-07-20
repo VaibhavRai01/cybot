@@ -58,7 +58,7 @@ async def keep_alive():
             logging.info('Keep-alive message sent')
         else:
             logging.warning('Channel not found')
-        await asyncio.sleep(60)  # Wait for 60 seconds before sending the next message
+        await asyncio.sleep(300)  # Wait for 60 seconds before sending the next message
 
     
 if __name__ == "__main__":
