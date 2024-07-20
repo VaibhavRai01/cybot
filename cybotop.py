@@ -28,18 +28,7 @@ import threading
 # Load environment variables from .env file
 load_dotenv()
 
-@bot.event
-async def on_ready():
-    logging.info(f'Logged in as {bot.user}')
-    asyncio.create_task(keep_alive())  # Start the keep-alive task
 
-@bot.event
-async def on_disconnect():
-    logging.warning('Bot disconnected')
-
-@bot.event
-async def on_reconnect():
-    logging.info('Bot reconnected')
 
 # HTTP server setup
 async def handle(request):
@@ -529,6 +518,7 @@ if __name__ == "__main__":
         synced = await bot.tree.sync()
         print(f"Slash commands synced and lenght is " + str(len(synced)) + "commnads")
         reminder.start()
+        asyncio.create_task(keep_alive()) 
         # daily_problems.start()
 
 
